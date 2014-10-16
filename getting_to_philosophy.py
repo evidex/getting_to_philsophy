@@ -311,6 +311,7 @@ def hop_to_wiki_url(graph, start_wiki_url, destination_wiki_url, limit):
             if data["found_shortcut"]:
                 data["found_shortcut"] = True
                 print(" Found existing path from {} to {}".format(page_name, end_page_name))
+            print("")
             return data
         # Didn't find a goal condition, get next url and keep going
         next_url = philosophy_links.get_philosophy_link(next_url)
@@ -347,6 +348,7 @@ def run(num_runs, output_filename, end_url):
     # Draw resulting graph
     graph.layout(prog="dot")
     graph.draw(output_filename)
+    # print(results)
 
 ################
 # "Main":
