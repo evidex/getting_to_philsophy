@@ -1,18 +1,12 @@
 """
 
 """
+from __future__ import print_function
 import sys
-import pygraphviz
+import pygraphviz as pgv
 import argparse
 import urllib2
 from bs4 import BeautifulSoup, SoupStrainer, Tag, NavigableString
-
-# Import pygraph
-import pygraph
-from pygraph.classes.graph import graph
-from pygraph.classes.digraph import digraph
-from pygraph.algorithms.searching import breadth_first_search
-from pygraph.readwrite.dot import write
 
 class getting_to_philosophy:
     def __init__(self):
@@ -265,12 +259,12 @@ def follow_url(url):
         page = urllib2.urlopen(url)
         return page
     except (ValueError, urllib2.URLError) as e:
-        print e
+        print( e )
         return False
 
 
 
-def hop_to_wiki_url(start_wiki_url, destination_wiki_url, limit):
+def hop_to_wiki_url(graph, start_wiki_url, destination_wiki_url, limit):
     """
         Following the rules of Getting to Philosophy, hop from
         a start wiki url, to a destination url.  Output the links on
@@ -279,11 +273,11 @@ def hop_to_wiki_url(start_wiki_url, destination_wiki_url, limit):
     """
     start_page_name = return_wiki_page_name(start_wiki_url)
     end_page_name = return_wiki_page_name(destination_wiki_url)
+    graph.add_nodes_from([start_page_name, end_page_name])
+    print( "Finding path from {} to {}".format(start_page_name, end_page_name) )
 
     # handle the case that we start at our destination
     if start_page_name == end_page_name:
-        print "Looks like we started at our destination page:",start_wiki_url
-        print "0 hops"
         return
 
     # create our philosophy_link fetching object
@@ -291,60 +285,54 @@ def hop_to_wiki_url(start_wiki_url, destination_wiki_url, limit):
 
     # grab our first url
     next_url = philosophy_links.get_philosophy_link(start_wiki_url)
+    page_name = start_page_name
 
     hops = 0
-    print start_wiki_url
     while next_url != False and hops < limit:
-        print next_url
+        prev_page_name = page_name
         page_name = return_wiki_page_name(next_url)
+        graph.add_edge(prev_page_name, page_name)
+        print('.', end='')
         hops = hops + 1
 
         if page_name == end_page_name:
-            print "Arrived."
-            print hops,"hops"
+            print("X  -  {} hops".format(hops))
             return
 
         next_url = philosophy_links.get_philosophy_link(next_url)
 
 
-    print "Looks like we hit our page-limit, a dead-end, a loop, or a bad link."
-    print "Unknown # hops."
+    # Couldn't reach end_url
+    print("#  -  Couldn't reach {}".format(end_page_name))
     return
 
 
-
+def run(numRuns, outputFileName):
+    # Create a graph
+    graph = pgv.AGraph()
+    random_url_gen = "http://en.wikipedia.org/wiki/Special:Random"
+    end_url = "https://en.wikipedia.org/wiki/Philosophy"
+    limit = 50
+    # For some random pages
+    for i in xrange(numRuns):
+        # Get random url
+        start_url = follow_url(random_url_gen).geturl()
+        # Populate graph with path form start_url to end_url
+        hop_to_wiki_url(graph, start_url, end_url, limit)
+    # Draw resulting graph
+    graph.layout()
+    graph.draw(outputFileName)
 
 ################
 # "Main":
 ################
 if __name__ == "__main__":
     # build command-line parser
-    parser = argparse.ArgumentParser(description='Generates a graph of the path from a number of random Wikipedia pages back to Philsophy')
-    parser.add_argument('NUMBER_OF_PAGES', help='Number of random pages to add to the graph' )
+    parser = argparse.ArgumentParser(description='Generates a graph of the path from a number of random Wikipedia pages back to philosophy')
+    parser.add_argument('--NUMBER_OF_PAGES', '-n', help='Number of random pages to add to the graph', default=10 )
+    parser.add_argument('--OUTPUT_FILENAME', '-o', help="Name of output file to generate", default="output_graph.png")
 
     # parse command line arguments
     args = parser.parse_args()
 
-
-    # Check input url..
-    # Try to follow the starting link to a webpage
-    first_wiki = follow_url(args.STARTING_LINK)
-
-    if first_wiki == False:
-        print "Error folling given link."
-        print "Please enter a valid (English wikipedia) URL, http://en.wikipedia.org/wiki/some_page"
-        print "Exiting..."
-        exit()
-
-
-    # Check that the starting link is a wiki page
-    if not is_wiki_url(args.STARTING_LINK):
-        print "Starting link must be some to wikipedia page."
-        print "Please enter a valid (English wikipedia) URL, http://en.wikipedia.org/wiki/some_page"
-        print "Exiting..."
-        exit()
-
-
-    destination_wiki = "http://en.wikipedia.org/wiki/Philosophy"
-    limit = 100
-    hop_to_wiki_url(args.STARTING_LINK, destination_wiki, limit)
+    run(args.NUMBER_OF_PAGES, args.OUTPUT_FILENAME)
