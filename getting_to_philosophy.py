@@ -2,6 +2,7 @@
 
 """
 from __future__ import print_function
+from __future__ import division
 import sys
 import pygraphviz as pgv
 import argparse
@@ -279,7 +280,7 @@ def hop_to_wiki_url(graph, start_wiki_url, destination_wiki_url, limit):
 
     # handle the case that we start at our destination
     if start_page_name == end_page_name:
-        return
+        return None
 
     # create our philosophy_link fetching object
     philosophy_links = getting_to_philosophy()
@@ -288,29 +289,35 @@ def hop_to_wiki_url(graph, start_wiki_url, destination_wiki_url, limit):
     next_url = philosophy_links.get_philosophy_link(start_wiki_url)
     page_name = start_page_name
 
-    hops = 0
+    data = {
+        "page_name": page_name,
+        "found_shortcut": False,
+        "failed": False,
+        "hops": 0}
     while next_url != False and hops < limit:
         prev_page_name = page_name
         page_name = return_wiki_page_name(next_url)
         edges.append((prev_page_name, page_name))
         print('.', end='')
-        hops = hops + 1
+        data["hops"] += 1
 
-        if page_name == end_page_name:
-            print("X  -  {} hops".format(hops))
+        # Check for a goal condition
+        data["found_shortcut"] = graph.has_node(page_name)
+        if page_name == end_page_name || data["found_shortcut"]:
+            print("X  -  {} hops".format(hops), end="")
+            # Add the edges to overall graph
             graph.add_edges_from(edges)
-            return
-        if graph.has_node(page_name):
-            print("%  -  Found existing path from {} to {}".format(page_name, end_page_name))
-            graph.add_edges_from(edges)
-            return
-
+            if data["found_shortcut"]:
+                data["found_shortcut"] = True
+                print(" Found existing path from {} to {}".format(page_name, end_page_name))
+            return data
+        # Didn't find a goal condition, get next url and keep going
         next_url = philosophy_links.get_philosophy_link(next_url)
-
 
     # Couldn't reach end_url
     print("#  -  Couldn't reach {}".format(end_page_name))
-    return
+    data["failed"] = True
+    return data
 
 
 def run(num_runs, output_filename, end_url):
@@ -318,18 +325,23 @@ def run(num_runs, output_filename, end_url):
     graph = pgv.AGraph(directed=True)
     random_url_gen = "http://en.wikipedia.org/wiki/Special:Random"
     limit = 50
+    results = []
     print("\nAttempting to get to {} from {} random Wikipedia pages. Hop limit --> {}".format(return_wiki_page_name(end_url), num_runs, limit))
     # For some random pages
+    start_time = time.time()
     for i in xrange(num_runs):
         print("{}: ".format(i), end="")
         # Get random url
         start_url = follow_url(random_url_gen).geturl()
         # Populate graph with path form start_url to end_url
         try:
-            hop_to_wiki_url(graph, start_url, end_url, limit)
+            data = hop_to_wiki_url(graph, start_url, end_url, limit)
+            results.append(data)
         except:
             print("We broke something")
             pass
+    time_taken = time.time() - start_time
+    print("Took {} minutes".format(round(time_taken/60)))
     # Draw resulting graph
     graph.layout(prog="dot")
     graph.draw(output_filename)
