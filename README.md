@@ -23,6 +23,13 @@ Todo
     - Common convergence points
     - Percentage of pages for which a path was not found
 
+Output
+------
+The following image shows the tree generated for 5 randomly selected Wikipedia pages
+![Random 5](http://evidex.me/assets/images/get_to_philosophy/random_5.png)
+
+[Here](http://evidex.me/assets/images/get_to_philosophy/random_to_philosophy_100.png) is an output image for 100 random Wikipedia pages (~4Mb PNG)
+
 Requirements
 ------------
 
