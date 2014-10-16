@@ -274,8 +274,8 @@ def hop_to_wiki_url(graph, start_wiki_url, destination_wiki_url, limit):
     """
     start_page_name = return_wiki_page_name(start_wiki_url)
     end_page_name = return_wiki_page_name(destination_wiki_url)
-    graph.add_nodes_from([start_page_name, end_page_name])
     print( "Finding path from {} to {}".format(start_page_name, end_page_name) )
+    edges = []
 
     # handle the case that we start at our destination
     if start_page_name == end_page_name:
@@ -292,12 +292,17 @@ def hop_to_wiki_url(graph, start_wiki_url, destination_wiki_url, limit):
     while next_url != False and hops < limit:
         prev_page_name = page_name
         page_name = return_wiki_page_name(next_url)
-        graph.add_edge(prev_page_name, page_name)
+        edges.append((prev_page_name, page_name))
         print('.', end='')
         hops = hops + 1
 
         if page_name == end_page_name:
             print("X  -  {} hops".format(hops))
+            graph.add_edges_from(edges)
+            return
+        if graph.has_node(page_name):
+            print("%  -  Found existing path from {} to {}".format(page_name, end_page_name))
+            graph.add_edges_from(edges)
             return
 
         next_url = philosophy_links.get_philosophy_link(next_url)
@@ -316,6 +321,7 @@ def run(num_runs, output_filename, end_url):
     print("\nAttempting to get to {} from {} random Wikipedia pages. Hop limit --> {}".format(return_wiki_page_name(end_url), num_runs, limit))
     # For some random pages
     for i in xrange(num_runs):
+        print("{}: ".format(i), end="")
         # Get random url
         start_url = follow_url(random_url_gen).geturl()
         # Populate graph with path form start_url to end_url
