@@ -4,6 +4,7 @@
 from __future__ import print_function
 from __future__ import division
 import sys
+import time
 import pygraphviz as pgv
 import argparse
 import urllib2
