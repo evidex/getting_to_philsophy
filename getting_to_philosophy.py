@@ -256,6 +256,7 @@ def follow_url(url):
         not valid/followable.
     """
     try:
+        assert is_wiki_url(url)
         page = urllib2.urlopen(url)
         return page
     except (ValueError, urllib2.URLError) as e:
@@ -309,7 +310,7 @@ def hop_to_wiki_url(graph, start_wiki_url, destination_wiki_url, limit):
 
 def run(num_runs, output_filename, end_url):
     # Create a graph
-    graph = pgv.AGraph()
+    graph = pgv.AGraph(directed=True)
     random_url_gen = "http://en.wikipedia.org/wiki/Special:Random"
     limit = 50
     print("\nAttempting to get to {} from {} random Wikipedia pages. Hop limit --> {}".format(return_wiki_page_name(end_url), num_runs, limit))
@@ -318,7 +319,11 @@ def run(num_runs, output_filename, end_url):
         # Get random url
         start_url = follow_url(random_url_gen).geturl()
         # Populate graph with path form start_url to end_url
-        hop_to_wiki_url(graph, start_url, end_url, limit)
+        try:
+            hop_to_wiki_url(graph, start_url, end_url, limit)
+        except:
+            print("We broke something")
+            pass
     # Draw resulting graph
     graph.layout()
     graph.draw(output_filename)
