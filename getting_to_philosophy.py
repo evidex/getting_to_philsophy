@@ -303,7 +303,7 @@ def hop_to_wiki_url(graph, start_wiki_url, destination_wiki_url, limit):
 
         # Check for a goal condition
         data["found_shortcut"] = graph.has_node(page_name)
-        if page_name == end_page_name || data["found_shortcut"]:
+        if page_name == end_page_name or data["found_shortcut"]:
             print("X  -  {} hops".format(hops), end="")
             # Add the edges to overall graph
             graph.add_edges_from(edges)
