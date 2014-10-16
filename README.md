@@ -13,6 +13,15 @@ Inspiration
 
 [XKCD](http://xkcd.com/903/)
 
+Todo
+----
++ Optimize to check for an existing path from current node to end node when making hops
++ Generate some statistics
+    - Average number of hops
+    - Minimum number of hops
+    - Maximum number of hop
+    - Common convergence points
+    - Percentage of pages for which a path was not found
 
 Requirements
 ------------
