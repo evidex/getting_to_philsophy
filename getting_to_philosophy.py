@@ -344,11 +344,32 @@ def run(num_runs, output_filename, end_url):
             print("We broke something")
             pass
     time_taken = time.time() - start_time
-    print("Took {} minutes".format(round(time_taken/60)))
+    time_taken_minutes = round(time_taken/60)
     # Draw resulting graph
+    print("Drawing graph to {}".format(output_filename))
     graph.layout(prog="dot")
     graph.draw(output_filename)
     # print(results)
+    total_runs = len(results)
+    num_pages_visited = graph.number_of_edges()
+    avghops = 0
+    num_failed = 0
+    for data in results:
+        if not data["found_shortcut"]:
+            avghops += data["hops"]
+        if data["failed"]:
+            failed += 1
+    stats = """
+    Total number of runs                    --> {}
+    Runs with no path to end point          --> {}
+    Average number of hops (no shortcuts)   --> {}
+    Number of pages visited                 --> {}
+    Time taken (minutes)                    --> {}
+    """.format(total_runs, num_failed, avghops, num_pages_visited, time_taken_minutes)
+    with open("stats.txt", "rt") as f:
+        f.write(stats)
+    print(stats)
+
 
 ################
 # "Main":
