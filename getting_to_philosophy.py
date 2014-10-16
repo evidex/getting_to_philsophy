@@ -329,7 +329,7 @@ def run(numRuns, outputFileName, end_url):
 if __name__ == "__main__":
     # build command-line parser
     parser = argparse.ArgumentParser(description='Generates a graph of the path from a number of random Wikipedia pages back to philosophy')
-    parser.add_argument('--NUMBER_OF_PAGES', '-n', help='Number of random pages to add to the graph', default=10 )
+    parser.add_argument('--NUMBER_OF_PAGES', '-n', help='Number of random pages to add to the graph', default=10, type=int )
     parser.add_argument('--OUTPUT_FILENAME', '-o', help="Name of output file to generate", default="output_graph.png")
     parser.add_argument('--END_URL', '-e', default="https://en.wikipedia.org/wiki/Philosophy")
 
