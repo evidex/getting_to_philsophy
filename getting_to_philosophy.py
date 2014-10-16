@@ -331,7 +331,7 @@ def run(num_runs, output_filename, end_url):
             print("We broke something")
             pass
     # Draw resulting graph
-    graph.layout()
+    graph.layout(prog="dot")
     graph.draw(output_filename)
 
 ################
