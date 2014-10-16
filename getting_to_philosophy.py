@@ -307,12 +307,12 @@ def hop_to_wiki_url(graph, start_wiki_url, destination_wiki_url, limit):
     return
 
 
-def run(numRuns, outputFileName):
+def run(numRuns, outputFileName, end_url):
     # Create a graph
     graph = pgv.AGraph()
     random_url_gen = "http://en.wikipedia.org/wiki/Special:Random"
-    end_url = "https://en.wikipedia.org/wiki/Philosophy"
     limit = 50
+    print("\nAttempting to get to Philosophy from {} random Wikipedia pages. Hop limit --> {}".format(numRuns, limit))
     # For some random pages
     for i in xrange(numRuns):
         # Get random url
@@ -331,8 +331,9 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Generates a graph of the path from a number of random Wikipedia pages back to philosophy')
     parser.add_argument('--NUMBER_OF_PAGES', '-n', help='Number of random pages to add to the graph', default=10 )
     parser.add_argument('--OUTPUT_FILENAME', '-o', help="Name of output file to generate", default="output_graph.png")
+    parser.add_argument('--END_URL', '-e', default="https://en.wikipedia.org/wiki/Philosophy")
 
     # parse command line arguments
     args = parser.parse_args()
 
-    run(args.NUMBER_OF_PAGES, args.OUTPUT_FILENAME)
+    run(args.NUMBER_OF_PAGES, args.OUTPUT_FILENAME, args.END_URL)
