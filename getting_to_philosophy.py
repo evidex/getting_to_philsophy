@@ -295,7 +295,7 @@ def hop_to_wiki_url(graph, start_wiki_url, destination_wiki_url, limit):
         "found_shortcut": False,
         "failed": False,
         "hops": 0}
-    while next_url != False and hops < limit:
+    while next_url != False and data["hops"] < limit:
         prev_page_name = page_name
         page_name = return_wiki_page_name(next_url)
         edges.append((prev_page_name, page_name))
@@ -305,7 +305,7 @@ def hop_to_wiki_url(graph, start_wiki_url, destination_wiki_url, limit):
         # Check for a goal condition
         data["found_shortcut"] = graph.has_node(page_name)
         if page_name == end_page_name or data["found_shortcut"]:
-            print("X  -  {} hops".format(hops), end="")
+            print("X  -  {} hops".format(data["hops"]), end="")
             # Add the edges to overall graph
             graph.add_edges_from(edges)
             if data["found_shortcut"]:
@@ -339,6 +339,7 @@ def run(num_runs, output_filename, end_url):
             data = hop_to_wiki_url(graph, start_url, end_url, limit)
             results.append(data)
         except:
+            print(sys.exc_info())
             print("We broke something")
             pass
     time_taken = time.time() - start_time
