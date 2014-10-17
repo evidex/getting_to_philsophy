@@ -332,13 +332,16 @@ def run(num_runs, output_filename, end_url):
     # For some random pages
     start_time = time.time()
     for i in xrange(num_runs):
-        print("{}: ".format(i), end="")
+        print("{}/{}: ".format(i, num_runs), end="")
         # Get random url
         start_url = follow_url(random_url_gen).geturl()
         # Populate graph with path form start_url to end_url
         try:
             data = hop_to_wiki_url(graph, start_url, end_url, limit)
             results.append(data)
+        except KeyboardInterrupt:
+            print("Ok, we'll stop")
+            break
         except:
             print(sys.exc_info())
             print("We broke something")
@@ -358,7 +361,7 @@ def run(num_runs, output_filename, end_url):
         if not data["found_shortcut"]:
             avghops += data["hops"]
         if data["failed"]:
-            failed += 1
+            num_failed += 1
     stats = """
     Total number of runs                    --> {}
     Runs with no path to end point          --> {}
@@ -366,7 +369,7 @@ def run(num_runs, output_filename, end_url):
     Number of pages visited                 --> {}
     Time taken (minutes)                    --> {}
     """.format(total_runs, num_failed, avghops, num_pages_visited, time_taken_minutes)
-    with open("stats.txt", "rt") as f:
+    with open("stats.txt", "wt") as f:
         f.write(stats)
     print(stats)
 
